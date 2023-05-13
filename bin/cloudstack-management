@@ -1,0 +1,74 @@
+#!/bin/bash
+
+SERVICE="cloudstack-management"
+DESC="management server"
+
+MGMT_SERVICE="cloudstack-management"
+USAGE_SERVICE="cloudstack-usage"
+
+find_pids() {
+    service=$1
+    pids=$(ps aux |grep "[j]ava" |grep "$service" |awk '{print $2}')
+    echo $pids
+}
+
+stop_pid() {
+    pids=$1
+    for pid in $pids;do
+        kill $pid
+    done
+}
+
+start_management() {
+    source /etc/default/cloudstack-management
+    tini -- /usr/bin/java $JAVA_DEBUG $JAVA_OPTS -cp $CLASSPATH $BOOTSTRAP_CLASS > /dev/null 2>&1 &
+}
+
+start_usage() {
+    source /etc/default/cloudstack-usage
+    tini -- /usr/bin/java -Dpid=$$ $JAVA_OPTS $JAVA_DEBUG -cp $CLASSPATH $JAVA_CLASS > /dev/null 2>&1 &
+}
+
+start_service() {
+    service=$1
+    if [ "$service" = "$MGMT_SERVICE" ];then
+        start_management
+    elif [ "$service" = "$USAGE_SERVICE" ];then
+        start_usage
+    fi
+}
+
+process_status() {
+    service=$1
+    pids=$(find_pids $SERVICE)
+    if [ "$pids" != "" ];then
+        echo >&2 "CloudStack $DESC is running with pid $pids"
+    else
+        echo >&2 "CloudStack $DESC is stopped"
+    fi
+}
+
+process() {
+    action=$1
+    if [ "$action" = "status" ] || [ "$action" = "" ];then
+        process_status $SERVICE
+    fi
+    pids=$(find_pids $SERVICE)
+    if [ "$pids" != "" ];then
+        if [ "$action" = "start" ];then
+            echo >&2 "CloudStack $DESC is running with pid $pids"
+            action=
+        elif [ "$action" = "stop" ] || [ "$action" = "restart" ];then
+            echo >&2 "Stopping $DESC with pid $pids"
+            stop_pid $pids
+            echo >&2 "Stopped $DESC with pid $pids"
+        fi
+    fi
+    if [ "$action" = "start" ] || [ "$action" = "restart" ];then
+        echo >&2 "Starting $DESC"
+        start_service $SERVICE
+        echo >&2 "Started $DESC"
+    fi
+}
+
+process $1
