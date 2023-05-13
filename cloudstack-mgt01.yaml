@@ -1,20 +1,14 @@
 version: "2.4"
 services:
   mgt01:
-    image: ubuntu:22.04
+    image: ustcweizhou/cloudstack-management
     hostname: mgt01
     networks:
-      cs:
+      cloudstack:
         ipv4_address: 10.0.34.217
-    entrypoint: ["tail", "-f", "/dev/null"]
-    expose:
-      - 8250
-      - 8080
-      - 8096
-      - 22
 
 networks:
-  cs:
+  cloudstack:
     driver: macvlan
     driver_opts:
       parent: eth0
