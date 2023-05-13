@@ -13,7 +13,7 @@ find_pids() {
 }
 
 stop_pid() {
-    pids=$1
+    pids=$*
     for pid in $pids;do
         kill $pid
     done
@@ -26,7 +26,7 @@ start_management() {
 
 start_usage() {
     source /etc/default/cloudstack-usage
-    tini -- /usr/bin/java -Dpid=$$ $JAVA_OPTS $JAVA_DEBUG -cp $CLASSPATH $JAVA_CLASS > /dev/null 2>&1 &
+    /usr/bin/java -Dpid=$$ $JAVA_OPTS $JAVA_DEBUG -cp $CLASSPATH $JAVA_CLASS > /dev/null 2>&1 &
 }
 
 start_service() {
