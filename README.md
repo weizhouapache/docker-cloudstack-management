@@ -46,7 +46,7 @@ To access container IP from the container host, or vice versa:
 You need to install mysql server in advance.
 You can create a mariadb galera cluster, refer to https://github.com/ustcweizhou/docker-mariadb-cluster
 
-Please note, GET_LOCK is not supported if WSREP_ON is ON.
+~~Please note, GET_LOCK is not supported if WSREP_ON is ON.~~ (This has been fixed https://jira.mariadb.org/browse/MDEV-31325)
 
     mysql> SELECT GET_LOCK('lock',10);
     ERROR 1235 (42000): This version of MariaDB doesn't yet support 'GET_LOCK in cluster (WSREP_ON=ON)'
