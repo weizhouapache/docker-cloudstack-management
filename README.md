@@ -6,7 +6,7 @@ This repository maintains the Dockerfile and scripts to build docker image for A
 
 ### (Optional) Build docker image
 
-    docker build -f Dockerfile -t ustcweizhou/cloudstack-management .
+    docker build -f Dockerfile -t weizhouapache/cloudstack-management .
 
 ### Update docker-compose configuration
 
