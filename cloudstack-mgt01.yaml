@@ -1,11 +1,11 @@
 version: "2.4"
 services:
   mgt01:
-    image: ustcweizhou/cloudstack-management
+    image: weizhouapache/cloudstack-management
     hostname: mgt01
     networks:
       cloudstack:
-        ipv4_address: 10.0.34.217
+        ipv4_address: 10.0.34.4
 
 networks:
   cloudstack:

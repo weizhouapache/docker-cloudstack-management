@@ -1,4 +1,4 @@
-FROM        ubuntu:22.04
+FROM        weizhouapache/docker-systemd:latest-ubuntu24
 MAINTAINER  Wei Zhou <ustcweizhou@gmail.com>
 
 ENV         DEBIAN_FRONTEND noninteractive
@@ -13,9 +13,4 @@ RUN         echo "deb http://download.cloudstack.org/ubuntu jammy 4.19" > /etc/a
             apt install -y cloudstack-management && \
             apt install -y cloudstack-usage
 
-COPY        bin /usr/bin
-COPY        entrypoint.sh /entrypoint.sh
-
 EXPOSE      8080 8250 8096 22
-
-ENTRYPOINT  ["tini", "--", "/entrypoint.sh"]
