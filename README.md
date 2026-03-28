@@ -65,9 +65,9 @@ To fix it, make the following change in the containers and restart them.
 
 To manage cloudstack management service:
 
-    /usr/bin/cloudstack-management status/start/stop/restart
+    systemctl status/start/stop/restart cloudstack-management
 
 To manage cloudstack usage service:
 
-    /usr/bin/cloudstack-usage status/start/stop/restart
+    systemctl status/start/stop/restart cloudstack-usage
 
