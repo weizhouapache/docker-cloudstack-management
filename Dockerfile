@@ -13,4 +13,8 @@ RUN         echo "deb http://download.cloudstack.org/ubuntu noble 4.22" > /etc/a
             apt install -y cloudstack-management && \
             apt install -y cloudstack-usage
 
+COPY        entrypoint.sh /entrypoint.sh
+
 EXPOSE      8080 8250 8096 22
+
+ENTRYPOINT  ["/entrypoint.sh"]
