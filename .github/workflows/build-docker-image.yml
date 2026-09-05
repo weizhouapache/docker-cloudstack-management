@@ -66,3 +66,16 @@ jobs:
         run: if [ "${TAG}" = "latest" ];then docker tag ${FULL_TAG} ${FULL_TAG/:latest/:4.22.0.0}; fi
       - name: Push Docker image with CloudStack version to Docker Registry
         run: if [ "${TAG}" = "latest" ];then docker push ${FULL_TAG/:latest/:4.22.0.0}; fi
+
+      - name: Set Docker image FULL TAG for ubuntu26
+        run: echo "FULL_TAG_UBUNTU26=$(if [ "${{ secrets.DOCKER_REGISTRY }}" = "" ];then echo ${DOCKER_REPOSITORY}/cloudstack-management:${TAG}-ubuntu26;else echo ${{ secrets.DOCKER_REGISTRY }}/${DOCKER_REPOSITORY}/cloudstack-management:${TAG}-ubuntu26;fi)" >> $GITHUB_ENV
+
+      - name: Build the Docker image for cloudstack-management (ubuntu26, ACS 4.23)
+        run: docker build . --file Dockerfile-ubuntu26 --tag ${FULL_TAG_UBUNTU26}
+      - name: Push Docker image to Docker Registry (ubuntu26, ACS 4.23)
+        run: docker push ${FULL_TAG_UBUNTU26}
+
+      - name: Tag Docker image with CloudStack version (ubuntu26)
+        run: if [ "${TAG}" = "latest" ];then docker tag ${FULL_TAG_UBUNTU26} ${FULL_TAG_UBUNTU26/:latest-ubuntu26/:4.23.0.0-ubuntu26}; fi
+      - name: Push Docker image with CloudStack version to Docker Registry (ubuntu26)
+        run: if [ "${TAG}" = "latest" ];then docker push ${FULL_TAG_UBUNTU26/:latest-ubuntu26/:4.23.0.0-ubuntu26}; fi
