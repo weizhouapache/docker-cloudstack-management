@@ -8,27 +8,56 @@ This repository maintains the Dockerfile and scripts to build docker image for A
 
     docker build -f Dockerfile -t weizhouapache/cloudstack-management .
 
-### Update docker-compose configuration
+The image is based on `weizhouapache/docker-systemd:latest-ubuntu24` (or `latest-ubuntu26`
+via `Dockerfile-ubuntu26`), which runs `systemd` as PID 1 so that
+`cloudstack-management`/`cloudstack-usage` can be managed as normal systemd services
+(`systemctl status/start/stop/restart ...`).
 
-Edit cloudstack-mgt01.yaml and update to proper configuration
+**Important:** running systemd inside the container requires the `--privileged` flag
+(confirmed on Ubuntu 24 and Ubuntu 26 based images) — without it, systemd fails to start
+and the container exits immediately.
 
-### Install docker-compose
+### Option 1: run with `docker run`
 
-    apt install docker-compose -y
+    docker run -d \
+        --name mgt01 \
+        --privileged \
+        --hostname mgt01 \
+        weizhouapache/cloudstack-management
 
-### Create the containers
+List the container:
 
-    docker-compose -f cloudstack-mgt01.yaml up -d
+    docker ps -f name=mgt01
 
-### List the containers
+Access the container:
 
-    docker-compose -f cloudstack-mgt01.yaml ps
+    docker exec -it mgt01 bash
+
+### Option 2: run with `docker compose`
+
+#### Update the compose configuration
+
+Edit `cloudstack-mgt01.yaml` and update to proper configuration. Note that
+`privileged: true` is already set on the `mgt01` service — this is required for
+systemd to boot inside the container, so keep it unless you have another way to
+grant the equivalent privileges.
+
+#### Create the containers
+
+    docker compose -f cloudstack-mgt01.yaml up -d
+
+(older Docker installs use the standalone `docker-compose` binary instead —
+`apt install docker-compose -y`, then run `docker-compose -f cloudstack-mgt01.yaml up -d`)
+
+#### List the containers
+
+    docker compose -f cloudstack-mgt01.yaml ps
 
 ##  Advanced steps
 
-### Access the containers via docker-compose
+### Access the containers via docker compose
 
-    docker-compose -f cloudstack-mgt01.yaml exec mgt01 bash
+    docker compose -f cloudstack-mgt01.yaml exec mgt01 bash
 
 ### Access the containers via IP (from container host)
 

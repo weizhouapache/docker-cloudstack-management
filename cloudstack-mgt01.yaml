@@ -3,6 +3,7 @@ services:
   mgt01:
     image: weizhouapache/cloudstack-management
     hostname: mgt01
+    privileged: true
     networks:
       cloudstack:
         ipv4_address: 10.0.34.4
