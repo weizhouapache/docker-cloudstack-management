@@ -1,0 +1,100 @@
+services:
+  db01:
+    image: ustcweizhou/mariadb-cluster:latest
+    hostname: db01
+    networks:
+        cs-net:
+            ipv4_address: 172.19.26.11
+    volumes:
+      - ./db01:/var/lib/mysql
+    healthcheck:
+        test: ["CMD", "mysqladmin", "-uroot", "-pcloudstack", "ping"]
+        interval: 5s
+        timeout: 10s
+        retries: 60
+        start_period: 10s
+    environment:
+      - NODE_NAME=db01
+      - CLUSTER_ADDRESS=gcomm://db01,db02,db03
+      - DB_ROOT_PASSWORD=cloudstack
+      - DB_MARIABACKUP_PASSWORD=cloudstack
+
+  db02:
+    image: ustcweizhou/mariadb-cluster:latest
+    hostname: db02
+    depends_on:
+        db01:
+            condition: service_healthy
+    networks:
+        cs-net:
+            ipv4_address: 172.19.26.12
+    volumes:
+      - ./db02:/var/lib/mysql
+    healthcheck:
+        test: ["CMD", "mysqladmin", "-uroot", "-pcloudstack", "ping"]
+        interval: 5s
+        timeout: 10s
+        retries: 60
+        start_period: 10s
+    environment:
+      - NODE_NAME=db02
+      - CLUSTER_ADDRESS=gcomm://db01,db02,db03
+      - DB_ROOT_PASSWORD=cloudstack
+      - DB_MARIABACKUP_PASSWORD=cloudstack
+
+  db03:
+    image: ustcweizhou/mariadb-cluster:latest
+    hostname: db03
+    depends_on:
+        db01:
+            condition: service_healthy
+        db02:
+            condition: service_healthy
+    networks:
+        cs-net:
+            ipv4_address: 172.19.26.13
+    volumes:
+      - ./db03:/var/lib/mysql
+    environment:
+      - NODE_NAME=db03
+      - CLUSTER_ADDRESS=gcomm://db01,db02,db03
+      - DB_ROOT_PASSWORD=cloudstack
+      - DB_MARIABACKUP_PASSWORD=cloudstack
+
+  dbvip:
+    image: nginx
+    hostname: dbvip
+    networks:
+        cs-net:
+            ipv4_address: 172.19.26.14
+    ports:
+        - "13326:3306"
+    volumes:
+      - ./nginx-galera-cs26.conf:/etc/nginx/nginx.conf
+    depends_on:
+        db01:
+            condition: service_healthy
+
+  mgt01:
+    image: weizhouapache/cloudstack-management:latest-ubuntu26
+    hostname: mgt01
+    privileged: true
+    networks:
+        cs-net:
+            ipv4_address: 172.19.26.20
+    ports:
+        - "18081:8080"
+        - "18251:8250"
+        - "18097:8096"
+    depends_on:
+        db01:
+            condition: service_healthy
+
+networks:
+    cs-net:
+        driver: bridge
+        ipam:
+            driver: default
+            config:
+                - subnet: 172.19.26.0/24
+                  gateway: 172.19.26.254
